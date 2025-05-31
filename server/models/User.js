@@ -19,8 +19,20 @@ userSchema.pre("save", async function (next) {
   let salt = await bcrypt.genSalt(10);
   let hash = await bcrypt.hash(user.password, salt);
   user.password = hash;
-  next();
+  next(); // [import mongoose from "mongoose";]这里面自带的
 });
+/**你调用 user.save()
+  ↓
+Mongoose 检查有没有 pre('save') 钩子
+  ↓
+发现有 → 执行你的函数 (function(next) {...})
+  ↓
+如果密码被修改 → 加密密码
+  ↓
+调用 next() → 通知 mongoose：“我处理好了”
+  ↓
+mongoose 真正执行 `.save()`：写入 MongoDB
+ */
 
 //check the password if matched when login
 userSchema.methods.comparePassword = async function (password) {
